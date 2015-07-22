@@ -1,0 +1,49 @@
+<%= form_for(@farmer) do |f| %>
+  <% if @farmer.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@farmer.errors.count, "error") %> prohibited this farmer from being saved:</h2>
+
+      <ul>
+      <% @farmer.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :email %><br>
+    <%= f.text_field :email %>
+  </div>
+  <div class="field">
+    <%= f.label :password_hash %><br>
+    <%= f.text_field :password_hash %>
+  </div>
+  <div class="field">
+    <%= f.label :farm %><br>
+    <%= f.text_field :farm %>
+  </div>
+  <div class="field">
+    <%= f.label :produce %><br>
+    <%= f.text_field :produce %>
+  </div>
+  <div class="field">
+    <%= f.label :produce_price %><br>
+    <%= f.number_field :produce_price %>
+  </div>
+  <div class="field">
+    <%= f.label :wepay_access_token %><br>
+    <%= f.text_field :wepay_access_token %>
+  </div>
+  <div class="field">
+    <%= f.label :wepay_account_id %><br>
+    <%= f.number_field :wepay_account_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

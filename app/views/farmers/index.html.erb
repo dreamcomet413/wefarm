@@ -1,0 +1,41 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Farmers</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Password hash</th>
+      <th>Farm</th>
+      <th>Produce</th>
+      <th>Produce price</th>
+      <th>Wepay access token</th>
+      <th>Wepay account</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @farmers.each do |farmer| %>
+      <tr>
+        <td><%= farmer.name %></td>
+        <td><%= farmer.email %></td>
+        <td><%= farmer.password_hash %></td>
+        <td><%= farmer.farm %></td>
+        <td><%= farmer.produce %></td>
+        <td><%= farmer.produce_price %></td>
+        <td><%= farmer.wepay_access_token %></td>
+        <td><%= farmer.wepay_account_id %></td>
+        <td><%= link_to 'Show', farmer %></td>
+        <td><%= link_to 'Edit', edit_farmer_path(farmer) %></td>
+        <td><%= link_to 'Destroy', farmer, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Farmer', new_farmer_path %>

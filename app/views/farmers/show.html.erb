@@ -1,0 +1,44 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @farmer.name %>
+</p>
+
+<p>
+  <strong>Email:</strong>
+  <%= @farmer.email %>
+</p>
+
+<p>
+  <strong>Password hash:</strong>
+  <%= @farmer.password_hash %>
+</p>
+
+<p>
+  <strong>Farm:</strong>
+  <%= @farmer.farm %>
+</p>
+
+<p>
+  <strong>Produce:</strong>
+  <%= @farmer.produce %>
+</p>
+
+<p>
+  <strong>Produce price:</strong>
+  <%= @farmer.produce_price %>
+</p>
+
+<p>
+  <strong>Wepay access token:</strong>
+  <%= @farmer.wepay_access_token %>
+</p>
+
+<p>
+  <strong>Wepay account:</strong>
+  <%= @farmer.wepay_account_id %>
+</p>
+
+<%= link_to 'Edit', edit_farmer_path(@farmer) %> |
+<%= link_to 'Back', farmers_path %>
