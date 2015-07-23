@@ -80,4 +80,26 @@ class FarmersController < ApplicationController
     def farmer_params
       params.require(:farmer).permit(:name, :email, :password_hash, :farm, :produce, :produce_price, :wepay_access_token, :wepay_account_id)
     end
+
+    GET /farmers/oauth/1
+    def oauth
+      if !params[:code]
+        return redirect_to('/')
+      end
+
+      redirect_uri = url_for(:controller => 'farmers', :action => 'oauth', :farmer_id => params[:farmer_id], :host => request.host_with_port)
+      @farmer = Farmer.find(params[:farmer_id])
+      begin
+        @farmer.request_wepay_access_token(params[:code], redirect_uri)
+      rescue Exception => e
+        error = e.message
+      end
+
+      if error
+        redirect_to @farmer, alert: error
+      else
+        redirect_to @farmer, notice: 'We successfully connected you to WePay!'
+      end
+    end
+    
 end

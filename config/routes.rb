@@ -9,5 +9,7 @@ Rails.application.routes.draw do
   get '/login' => 'sessions#new', :as => :login
   get '/logout' => 'sessions#destroy', :as => :logout
   post '/sessions/create' => 'sessions#create'
+
+  match '/farmers/:action(/:farmer_id)', :controller => 'farmers'
     
 end
