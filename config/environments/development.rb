@@ -44,5 +44,7 @@ Rails.application.configure do
   CLIENT_ID = 32636
   CLIENT_SECRET = "180c800c62"
   USE_STAGE = true
-  WEPAY = WePay.new(CLIENT_ID, CLIENT_SECRET, USE_STAGE)
+  
+  WEPAY = WePay::Client.new(CLIENT_ID, CLIENT_SECRET, USE_STAGE)
+
 end
