@@ -1,7 +1,6 @@
-<% if (@is_admin && (!@farmer.has_valid_wepay_access_token? || !@farmer.has_wepay_account?)) %>
-  <p>
-    <b>Please create an account to manage your money: </b>
-  <% redirect_uri = url_for(:controller => 'farmers', :action => 'oauth', :farmer_id => @farmer.id, :host => request.host_with_port) %>
-    <a class="btn btn-primary" href="<%= @farmer.wepay_authorization_url(redirect_uri) %>">Click here to create your account</a>
-  </p>
+<h1><%= @farmer.farm %></h1>
+
+<% if (@farmer.has_wepay_account? && !@is_admin) %>
+<br />
+<%= link_to "Buy #{@farmer.produce} Now!", "/farmers/buy/#{@farmer.id}", :class => 'btn btn-danger btn-large', :id => 'buy-now-button' %>
 <% end %>

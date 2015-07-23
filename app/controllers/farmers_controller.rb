@@ -81,7 +81,7 @@ class FarmersController < ApplicationController
       params.require(:farmer).permit(:name, :email, :password_hash, :farm, :produce, :produce_price, :wepay_access_token, :wepay_account_id)
     end
 
-    GET /farmers/oauth/1
+    #GET /farmers/oauth/1
     def oauth
       if !params[:code]
         return redirect_to('/')
@@ -101,5 +101,5 @@ class FarmersController < ApplicationController
         redirect_to @farmer, notice: 'We successfully connected you to WePay!'
       end
     end
-    
+
 end

@@ -95,4 +95,53 @@ class Farmer < ActiveRecord::Base
     end   
     raise "Error - cannot create WePay account"
   end
+
+  # creates a checkout object using WePay API for this farmer
+  def create_checkout(redirect_uri)
+    # calculate app_fee as 10% of produce price
+    app_fee = self.produce_price * 0.1
+
+    params = {
+      :account_id => self.wepay_account_id,
+      :short_description => "Produce sold by #{self.farm}",
+      :type => :GOODS,
+      :amount => self.produce_price,      
+      :app_fee => app_fee,
+      :fee_payer => :payee,     
+      :mode => :iframe,
+      :redirect_uri => redirect_uri
+    }
+    response = Wefarm::Application::WEPAY.call('/checkout/create', self.wepay_access_token, params)
+
+    if !response
+      raise "Error - no response from WePay"
+    elsif response['error']
+      raise "Error - " + response["error_description"]
+    end
+
+    return response
+  end
+
+  # GET /farmers/buy/1
+  def buy
+    redirect_uri = url_for(:controller => 'farmers', :action => 'payment_success', :farmer_id => params[:farmer_id], :host => request.host_with_port)
+    @farmer = Farmer.find(params[:farmer_id])
+    begin
+      @checkout = @farmer.create_checkout(redirect_uri)
+    rescue Exception => e
+      redirect_to @farmer, alert: e.message
+    end
+  end
+
+  # GET /farmers/payment_success/1
+  def payment_success
+    @farmer = Farmer.find(params[:farmer_id])
+    if !params[:checkout_id]
+      return redirect_to @farmer, alert: "Error - Checkout ID is expected"
+    end
+    if (params['error'] && params['error_description'])
+      return redirect_to @farmer, alert: "Error - #{params['error_description']}"
+    end
+    redirect_to @farmer, notice: "Thanks for the payment! You should receive a confirmation email shortly."
+  end
 end
