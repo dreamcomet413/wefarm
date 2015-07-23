@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   get 'sessions/new'
 
   resources :farmers
-  root :to => "welcome#index"
+  root :to => "farmers#index"
   get 'welcome/index'
   get 'register' => 'farmers#new', :as => :register 
   get '/login' => 'sessions#new', :as => :login
