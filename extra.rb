@@ -1,60 +1,52 @@
-/auth/facebook?display=popup
-      def authorize_params
-        super.tap do |params|
-          %w[display scope auth_type].each do |v|
-            if request.params[v]
-              params[v.to_sym] = request.params[v]
-            end
-          end
+require 'openssl'
 
-          params[:scope] ||= DEFAULT_SCOPE
-        end
+module OmniAuth
+  module Facebook
+    class SignedRequest
+      class UnknownSignatureAlgorithmError < NotImplementedError; end
+      SUPPORTED_ALGORITHM = 'HMAC-SHA256'
+
+      attr_reader :value, :secret
+
+      def self.parse(value, secret)
+        new(value, secret).payload
       end
 
-      protected
+      def initialize(value, secret)
+        @value = value
+        @secret = secret
+      end
 
-      def build_access_token
-        super.tap do |token|
-          token.options.merge!(access_token_options)
-        end
+      def payload
+        @payload ||= parse_signed_request
       end
 
       private
 
-      def signed_request_from_cookie
-        @signed_request_from_cookie ||= raw_signed_request_from_cookie && OmniAuth::Facebook::SignedRequest.parse(raw_signed_request_from_cookie, client.secret)
-      end
+      def parse_signed_request
+        signature, encoded_payload = value.split('.')
+        return if signature.nil?
 
-      def raw_signed_request_from_cookie
-        request.cookies["fbsr_#{client.id}"]
-      end
+        decoded_hex_signature = base64_decode_url(signature)
+        decoded_payload = MultiJson.decode(base64_decode_url(encoded_payload))
 
-      # Picks the authorization code in order, from:
-      #
-      # 1. The request 'code' param (manual callback from standard server-side flow)
-      # 2. A signed request from cookie (passed from the client during the client-side flow)
-      def with_authorization_code!
-        if request.params.key?('code')
-          yield
-        elsif code_from_signed_request = signed_request_from_cookie && signed_request_from_cookie['code']
-          request.params['code'] = code_from_signed_request
-          @authorization_code_from_signed_request_in_cookie = true
-          # NOTE The code from the signed fbsr_XXX cookie is set by the FB JS SDK will confirm that the identity of the
-          #      user contained in the signed request matches the user loading the app.
-          original_provider_ignores_state = options.provider_ignores_state
-          options.provider_ignores_state = true
-          begin
-            yield
-          ensure
-            request.params.delete('code')
-            @authorization_code_from_signed_request_in_cookie = false
-            options.provider_ignores_state = original_provider_ignores_state
-          end
-        else
-          raise NoAuthorizationCodeError, 'must pass either a `code` (via URL or by an `fbsr_XXX` signed request cookie)'
+        unless decoded_payload['algorithm'] == SUPPORTED_ALGORITHM
+          raise UnknownSignatureAlgorithmError, "unknown algorithm: #{decoded_payload['algorithm']}"
+        end
+
+        if valid_signature?(decoded_hex_signature, encoded_payload)
+          decoded_payload
         end
       end
 
-      
+      def valid_signature?(signature, payload, algorithm = OpenSSL::Digest::SHA256.new)
+        OpenSSL::HMAC.digest(algorithm, secret, payload) == signature
+      end
+
+      def base64_decode_url(value)
+        value += '=' * (4 - value.size.modulo(4))
+        Base64.decode64(value.tr('-_', '+/'))
+      end
+    end
   end
 end
