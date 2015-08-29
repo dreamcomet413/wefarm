@@ -17,6 +17,28 @@ module OmniAuth
         @secret = secret
       end
 
+      def payload
+        @payload ||= parse_signed_request
+      end
+
+      private
+
+      def parse_signed_request
+        signature, encoded_payload = value.split('.')
+        return if signature.nil?
+
+        decoded_hex_signature = base64_decode_url(signature)
+        decoded_payload = MultiJson.decode(base64_decode_url(encoded_payload))
+
+        unless decoded_payload['algorithm'] == SUPPORTED_ALGORITHM
+          raise UnknownSignatureAlgorithmError, "unknown algorithm: #{decoded_payload['algorithm']}"
+        end
+
+        if valid_signature?(decoded_hex_signature, encoded_payload)
+          decoded_payload
+        end
+      end
+
       def valid_signature?(signature, payload, algorithm = OpenSSL::Digest::SHA256.new)
         OpenSSL::HMAC.digest(algorithm, secret, payload) == signature
       end
